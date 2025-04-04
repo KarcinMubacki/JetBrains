@@ -1,7 +1,7 @@
 import pandas as pd
 
 
-def parse_and_prune_ruleset(rules_raw, transactions_df, target_item, min_support=0.0, min_confidence=0.0):
+def parse_and_prune_ruleset(rules_raw, transactions_df, target_item='donor_is_old', min_support=0.0, min_confidence=0.0):
     """
     Parses and prunes a rule set with a single target variable.
     Calculates support/confidence from transaction data and removes overly specific rules.
@@ -15,7 +15,6 @@ def parse_and_prune_ruleset(rules_raw, transactions_df, target_item, min_support
     """
     rule_lines = [line.strip() for line in rules_raw.strip().split("\n") if line.strip()]
     parsed_rules = []
-
     for rule in rule_lines:
         if "=>" not in rule:
             continue
@@ -62,7 +61,7 @@ def parse_and_prune_ruleset(rules_raw, transactions_df, target_item, min_support
     rules_df = rules_df[(rules_df["Support"] >= min_support) & (rules_df["Confidence"] >= min_confidence)]
 
     def is_overly_specific(idx, rules):
-        rule = rules.iloc[idx]
+        rule = rules.loc[idx]
         for j, other in rules.iterrows():
             if j == idx:
                 continue
@@ -71,8 +70,7 @@ def parse_and_prune_ruleset(rules_raw, transactions_df, target_item, min_support
                     if other["Confidence"] >= rule["Confidence"]:
                         return True
         return False
-
     rules_df["Overly_Specific"] = rules_df.index.to_series().apply(lambda i: is_overly_specific(i, rules_df))
     pruned_df = rules_df[~rules_df["Overly_Specific"]].drop(columns="Overly_Specific")
-
+    print(pruned_df)
     return pruned_df.reset_index(drop=True)
