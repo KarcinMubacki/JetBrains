@@ -61,7 +61,6 @@ def parse_and_prune_ruleset(rules_raw, transactions_df, target_item, min_support
 
     rules_df = rules_df[(rules_df["Support"] >= min_support) & (rules_df["Confidence"] >= min_confidence)]
 
-    # Step 4: Prune overly specific rules
     def is_overly_specific(idx, rules):
         rule = rules.iloc[idx]
         for j, other in rules.iterrows():
